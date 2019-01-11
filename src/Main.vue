@@ -1,10 +1,10 @@
 <template lang="pug">
 #scene
-  pre(v-for='j in ship.height')
+  pre(v-for='j in game.ship.height')
     Tile(
-      v-for='i in ship.width'
+      v-for='i in game.ship.width'
       :pos='{ x: i - 1, y: j - 1 }'
-      :ship='ship'
+      :drawer='drawer'
       :key='i + "-" + j'
       )
 </template>
@@ -13,17 +13,30 @@
 import Vue from "vue";
 import Tile from "./Tile.vue";
 
-import { ship, Ship } from "./lib/Ship";
+import { ship, Game, Ship, Drawer } from "./lib/Ship";
 
 export default Vue.extend({
   name: "Main",
   data() {
     return {
-      ship: ship as Ship
+      game: new Game(ship),
+      drawer: new Drawer(ship),
+      tickInterval: 0
     };
   },
   components: {
     Tile
+  },
+  methods: {
+    tick() {
+      this.game.tick();
+    }
+  },
+  mounted() {
+    this.tickInterval = window.setInterval(() => this.tick(), 100);
+  },
+  beforeDestroy() {
+    window.clearInterval(this.tickInterval);
   }
 });
 </script>

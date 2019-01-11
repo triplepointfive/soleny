@@ -6,23 +6,38 @@ span.plan-tile(:class='tileClass')
 <script lang="ts">
 import Vue from "vue";
 
-import { SymbolTileVisitor, Tile, StyleTileVisitor } from "./lib/Ship";
+import {
+  SymbolTileVisitor,
+  Tile,
+  StyleTileVisitor,
+  Drawable
+} from "./lib/Ship";
 
 const symbolizer = new SymbolTileVisitor();
 const styler = new StyleTileVisitor();
 
 export default Vue.extend({
   name: "Tile",
-  props: ["ship", "pos"],
+  props: ["drawer", "pos"],
   computed: {
-    tile(): Tile {
-      return this.ship.at(this.pos);
+    drawable(): Drawable {
+      return this.drawer.draw(this.pos);
     },
     tileSymbol(): string {
-      return this.tile.visit(symbolizer);
+      if (this.drawable.creatures.length) {
+        return "H";
+      } else if (this.drawable.tile) {
+        return this.drawable.tile.visit(symbolizer);
+      } else {
+        return "";
+      }
     },
     tileClass(): string {
-      return this.tile.visit(styler);
+      if (this.drawable.tile) {
+        return this.drawable.tile.visit(styler);
+      } else {
+        return "";
+      }
     }
   }
 });
