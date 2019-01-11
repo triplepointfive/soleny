@@ -13,6 +13,8 @@
   },
   "devDependencies": {
     "poi": "^12.4.2",
+    "pug": "^2.0.3",
+    "pug-plain-loader": "^1.0.0",
     "vue-template-compiler": "^2.5.21"
   }
 }
