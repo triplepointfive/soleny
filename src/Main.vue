@@ -1,32 +1,29 @@
 <template lang="pug">
 #scene
-  pre(v-for='line in ship')
-    span(v-for="tile in line" :class='tileClass(tile)')
-      | {{ tile }}
+  pre(v-for='j in ship.height')
+    Tile(
+      v-for='i in ship.width'
+      :pos='{ x: i - 1, y: j - 1 }'
+      :ship='ship'
+      :key='i + "-" + j'
+      )
 </template>
 
 <script lang="ts">
 import Vue from "vue";
+import Tile from "./Tile.vue";
 
-import ship from "./lib/Ship";
+import { ship, Ship } from "./lib/Ship";
 
 export default Vue.extend({
   name: "Main",
   data() {
     return {
-      ship: ship.split("\n")
+      ship: ship as Ship
     };
   },
-  methods: {
-    tileClass(tile: string): string {
-      return (
-        {
-          "+": "door",
-          " ": "space",
-          ".": "space"
-        }[tile] || "wall"
-      );
-    }
+  components: {
+    Tile
   }
 });
 </script>

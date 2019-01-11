@@ -1,5 +1,5 @@
 /* eslint-env browser */
-import "./assets/css/style.css"
+import "./assets/css/style.scss"
 
 import Vue from "vue"
 import Main from "./Main.vue"
