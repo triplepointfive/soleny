@@ -39,6 +39,7 @@ import { Input, IdleInput } from "../Input"
 // `
 //
 export abstract class TileVisitor<T> {
+  public abstract visitConstruction(construction: ConstructionTile): T
   public abstract visitDoor(door: Door): T
   public abstract visitWall(door: Wall): T
   public abstract visitFloor(door: Floor): T
@@ -46,6 +47,16 @@ export abstract class TileVisitor<T> {
 
 export abstract class Tile {
   public abstract visit<T>(visitor: TileVisitor<T>): T
+}
+
+export class ConstructionTile extends Tile {
+  constructor(public passable: boolean, public symbol: string) {
+    super()
+  }
+
+  public visit<T>(visitor: TileVisitor<T>): T {
+    return visitor.visitConstruction(this)
+  }
 }
 
 export class Door extends Tile {
@@ -71,6 +82,10 @@ export class Floor extends Tile {
 }
 
 export class SymbolTileVisitor extends TileVisitor<string> {
+  public visitConstruction({ symbol }: ConstructionTile): string {
+    return symbol
+  }
+
   public visitDoor(door: Door): string {
     if (door.open) {
       return "-"
@@ -89,6 +104,10 @@ export class SymbolTileVisitor extends TileVisitor<string> {
 }
 
 export class StyleTileVisitor extends TileVisitor<string> {
+  public visitConstruction(construction: ConstructionTile): string {
+    return "-wall"
+  }
+
   public visitDoor(door: Door): string {
     return "-door"
   }
@@ -172,6 +191,17 @@ export class Drawer {
   constructor(protected ship: Ship) {}
 
   public draw(pos: Point): Drawable {
+    const construction = ship.constructions.find(construction =>
+      construction.isIntersectional(pos)
+    )
+
+    if (construction) {
+      return {
+        tile: construction.tileAt(pos),
+        creatures: this.ship.creaturesAt(pos)
+      }
+    }
+
     return {
       tile: this.ship.tileAt(pos),
       creatures: this.ship.creaturesAt(pos)
@@ -241,16 +271,58 @@ const findPath = function(
   return
 }
 
+export abstract class Construction {
+  constructor(public pos: Point) {}
+
+  abstract get size(): Point
+  public abstract isIntersectional({ x, y }: Point): boolean
+  public abstract tileAt({ x, y }: Point): ConstructionTile
+}
+
+export class DoorSystem extends Construction {
+  get size(): Point {
+    return new Point(2, 2)
+  }
+
+  public isIntersectional({ x, y }: Point): boolean {
+    return (
+      x >= this.pos.x &&
+      x < this.pos.x + this.size.x &&
+      y >= this.pos.y &&
+      y < this.pos.y + this.size.y
+    )
+  }
+
+  public tileAt({ x, y }: Point): ConstructionTile {
+    //      ║··#··#··#
+    //      ╚═+#··#+##
+    switch ([x - this.pos.x, y - this.pos.y].join(" ")) {
+      case "0 0":
+        return new ConstructionTile(false, "║")
+      case "0 1":
+        return new ConstructionTile(false, "╚")
+      case "1 0":
+        return new ConstructionTile(false, "E")
+      case "1 1":
+        return new ConstructionTile(false, "═")
+      default:
+        return new ConstructionTile(false, "E")
+    }
+  }
+}
+
 export class Ship {
+  public creatures: Creature[] = []
+  public constructions: Construction[] = []
+
   constructor(
     public plan: Tile[],
     public width: number,
     public height: number
   ) {
     this.creatures = [new Creature(new Point(1, 1))]
+    this.constructions = [new DoorSystem(new Point(1, 4))]
   }
-
-  public creatures: Creature[] = []
 
   public creaturesAt(pos: Point): Creature[] {
     return filter(this.creatures, creature => creature.pos.eq(pos))

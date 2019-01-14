@@ -1,7 +1,7 @@
 <template lang="pug">
 .container
   #scene
-    pre(v-for='j in game.ship.height')
+    .row(v-for='j in game.ship.height')
       Tile(
         v-for='i in game.ship.width'
         :pos='{ x: i - 1, y: j - 1 }'
@@ -69,6 +69,11 @@ export default Vue.extend({
     position: absolute;
     left: 25%;
     transform: translate(50%, 0);
+
+    .row {
+      margin: 0;
+      font-family: "Anonymous Pro", monospace;
+    }
   }
 
   #aside {

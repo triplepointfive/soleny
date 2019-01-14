@@ -1,5 +1,5 @@
 <template lang="pug">
-span.plan-tile(:class='tileClass')
+.plan-tile(:class='tileClass')
   | {{ tileSymbol }}
 </template>
 
@@ -46,6 +46,9 @@ export default Vue.extend({
 <style lang="scss">
 .plan-tile {
   font-size: 2rem;
+  display: inline-block;
+  width: 22px;
+  text-align: center;
 
   &.-wall {
     background: grey;
