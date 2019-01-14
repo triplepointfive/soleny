@@ -240,6 +240,20 @@ const findPath = function(
   return
 }
 
+export enum InputComponent {
+  IdleComponent
+}
+
+export abstract class Input {
+  abstract get component(): InputComponent
+}
+
+export class IdleInput {
+  get component(): InputComponent {
+    return InputComponent.IdleComponent
+  }
+}
+
 export class Ship {
   constructor(
     public plan: Tile[],
@@ -271,6 +285,7 @@ export class Ship {
 
 export class Game {
   protected inAction: boolean = false
+  public input: Input = new IdleInput()
 
   constructor(public ship: Ship) {}
 
