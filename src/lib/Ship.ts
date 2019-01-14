@@ -1,4 +1,5 @@
 import { last, isEqual, uniqWith, flatMap, filter } from "lodash"
+import { Input, IdleInput } from "../Input"
 
 // export class Ship {}
 
@@ -238,20 +239,6 @@ const findPath = function(
   }
 
   return
-}
-
-export enum InputComponent {
-  IdleComponent
-}
-
-export abstract class Input {
-  abstract get component(): InputComponent
-}
-
-export class IdleInput {
-  get component(): InputComponent {
-    return InputComponent.IdleComponent
-  }
 }
 
 export class Ship {

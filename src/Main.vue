@@ -10,11 +10,7 @@
         )
   #aside
     section#panel
-      component(
-        :is='menuComponent'
-        :input='game.input'
-        ref='menuComponent'
-      )
+      SideMenu
     section#status
       | Status
 </template>
@@ -23,28 +19,25 @@
 import Vue, { Component } from "vue";
 import Tile from "./Tile.vue";
 
-import IdleInputComponent from "./Input/IdleInputComponent.vue";
+import SideMenu from "./SideMenu.vue";
 
-import { ship, Game, Ship, Drawer, InputComponent } from "./lib/Ship";
+import { ship, Game, Ship, Drawer } from "./lib/Ship";
 
 export default Vue.extend({
   name: "Main",
   data() {
     return {
-      game: new Game(ship),
       drawer: new Drawer(ship),
       tickInterval: 0
     };
   },
   components: {
-    Tile
+    Tile,
+    SideMenu
   },
   computed: {
-    menuComponent(): Component {
-      switch (this.game.input.component) {
-        case InputComponent.IdleComponent:
-          return IdleInputComponent;
-      }
+    game(): Game {
+      return this.$store.state.game;
     }
   },
   methods: {
@@ -52,10 +45,7 @@ export default Vue.extend({
       this.game.tick();
     },
     onEvent(event: KeyboardEvent) {
-      const menuComponent = this.$refs.menuComponent;
-      if (menuComponent) {
-        menuComponent.onEvent(event);
-      }
+      this.$store.commit("keyboardEvent", event);
     }
   },
   mounted() {

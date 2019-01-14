@@ -5,18 +5,15 @@
       | {{ k }}
     .value
       | {{ v }}
-
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-  name: "IdleInputComponent",
+  name: "SideMenu",
   computed: {
-    options() {
-      return {
-        u: "Units"
-      };
+    options(): object {
+      return this.$store.state.game.input.options(this.$store.state.game);
     }
   }
 });
