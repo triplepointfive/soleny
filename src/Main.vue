@@ -12,7 +12,8 @@
     section#panel
       SideMenu
     section#status
-      | Status
+      div {{ this.game.distanceLeft }}km left to Jupiter
+      div Ship's speed {{ this.game.speed / 10 }}km/s
 </template>
 
 <script lang="ts">

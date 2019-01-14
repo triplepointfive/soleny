@@ -274,6 +274,9 @@ export class Game {
   protected inAction: boolean = false
   public input: Input = new IdleInput()
 
+  public distanceLeft = 778 * 10 ** 6
+  public speed = 650000
+
   constructor(public ship: Ship) {}
 
   public tick(): void {
@@ -284,6 +287,7 @@ export class Game {
     this.inAction = true
 
     this.ship.tick()
+    this.distanceLeft -= this.speed / 10 // TODO: adjust by tick interval
 
     this.inAction = false
   }
