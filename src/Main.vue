@@ -1,12 +1,13 @@
 <template lang="pug">
-#scene
-  pre(v-for='j in game.ship.height')
-    Tile(
-      v-for='i in game.ship.width'
-      :pos='{ x: i - 1, y: j - 1 }'
-      :drawer='drawer'
-      :key='i + "-" + j'
-      )
+.container
+  #scene
+    pre(v-for='j in game.ship.height')
+      Tile(
+        v-for='i in game.ship.width'
+        :pos='{ x: i - 1, y: j - 1 }'
+        :drawer='drawer'
+        :key='i + "-" + j'
+        )
 </template>
 
 <script lang="ts">

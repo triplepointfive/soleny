@@ -215,13 +215,11 @@ const findPath = function(
   }
 
   if (mask[dest.x + dest.y * ship.width]) {
-    let lastPos = dest
+    let lastPos: Point | undefined = dest,
+      prevPos: Point | undefined = lastPos
 
     turn -= 2
-    while (turn > 0) {
-      // TODO: OMG, make it better
-      let prevPos = lastPos
-
+    while (turn > 0 && prevPos) {
       lastPos = prevPos
         .orthoWraps()
         .find(({ x, y }: Point) => mask[x + y * ship.width] === turn)
@@ -233,6 +231,7 @@ const findPath = function(
           .find(({ x, y }: Point) => mask[x + y * ship.width] === turn)
 
       turn -= 1
+      prevPos = lastPos
     }
 
     return lastPos
