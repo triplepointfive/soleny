@@ -1,4 +1,4 @@
-import { flatMapDeep, isEqual, uniqWith, flatMap, filter } from "lodash"
+import { concat, flatMapDeep, isEqual, uniqWith, flatMap, filter } from "lodash"
 import { Input, IdleInput } from "./Input"
 
 export abstract class TileVisitor<T> {
@@ -142,16 +142,7 @@ export class Point {
     new Point(1, 1)
   ]
 
-  public static readonly dxy = [
-    new Point(-1, -1),
-    new Point(0, -1),
-    new Point(1, -1),
-    new Point(-1, 0),
-    new Point(1, 0),
-    new Point(-1, 1),
-    new Point(0, 1),
-    new Point(1, 1)
-  ]
+  public static readonly dxy = concat(Point.ortho, Point.diag)
 
   public eq(point: Point): boolean {
     return this.x === point.x && this.y === point.y
@@ -193,7 +184,27 @@ export interface Drawable {
 }
 
 export class Drawer {
-  constructor(protected ship: Ship) {}
+  public cursorPos: Point
+  public showCursor: boolean
+  public frame: number
+
+  public tickFrame(): void {
+    this.frame += 1
+  }
+
+  constructor(protected ship: Ship) {
+    this.cursorPos = new Point(
+      Math.floor(ship.width / 2),
+      Math.floor(ship.height / 2)
+    )
+
+    this.showCursor = false
+    this.frame = 0
+  }
+
+  public isCursor(pos: Point): boolean {
+    return this.showCursor && this.cursorPos.eq(pos) && this.frame % 10 < 7
+  }
 
   public draw(pos: Point): Drawable {
     return {
@@ -350,14 +361,20 @@ export class Ship {
 export class Game {
   protected inAction: boolean = false
   public input: Input = new IdleInput()
+  public pause: boolean
+  public drawer: Drawer
 
   public distanceLeft = 778 * 10 ** 6
   public speed = 650000
 
-  constructor(public ship: Ship) {}
+  constructor(public ship: Ship) {
+    this.pause = true
+    this.drawer = new Drawer(ship)
+  }
 
   public tick(): void {
-    if (this.inAction) {
+    this.drawer.tickFrame()
+    if (this.inAction || this.pause) {
       return
     }
 

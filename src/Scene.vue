@@ -1,13 +1,6 @@
 <template lang="pug">
 .unicodetiles(ref='scene')
 </template>
-    // .row(v-for='j in game.ship.height')
-    //   Tile(
-    //     v-for='i in game.ship.width'
-    //     :pos='{ x: i - 1, y: j - 1 }'
-    //     :drawer='drawer'
-    //     :key='i + "-" + j'
-    //     )
 
 <script lang="ts">
 import Vue from "vue";
@@ -21,8 +14,15 @@ import {
   Tile
 } from "../vendor/unicodetiles.ts/src/index";
 
-import { Drawer, Point } from "./Ship";
-import { SymbolTileVisitor, StyleTileVisitor, Drawable } from "./Ship";
+import {
+  SymbolTileVisitor,
+  StyleTileVisitor,
+  Drawable,
+  Drawer,
+  Point,
+  Game,
+  Ship
+} from "./Ship";
 
 const styles: { [key: string]: Tile } = {
   "-wall": new Tile("#", 120, 120, 120, 120, 120, 120),
@@ -35,19 +35,34 @@ const styler = new StyleTileVisitor();
 
 export default Vue.extend({
   name: "Scene",
-  props: ["ship"],
   data() {
     return {
-      drawer: new Drawer(this.ship),
       term: null,
       eng: null,
       drawInterval: null,
       interval: 100
     };
   },
+  computed: {
+    ship(): Ship {
+      return this.game.ship;
+    },
+    drawer(): Drawer {
+      return this.game.drawer;
+    },
+    game(): Game {
+      return this.$store.state.game;
+    }
+  },
   methods: {
     getTile(x: number, y: number): Tile | undefined {
-      const cell = this.drawer.draw(new Point(x, y));
+      const pos = new Point(x, y);
+
+      if (this.drawer.isCursor(pos)) {
+        return new Tile("X", 120, 220, 120);
+      }
+
+      const cell = this.drawer.draw(pos);
 
       if (cell.creatures.length) {
         return new Tile("H", 220, 220, 220);

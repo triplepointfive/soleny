@@ -22,8 +22,7 @@ export default Vue.extend({
   name: "Main",
   data() {
     return {
-      tickInterval: 0,
-      frameInterval: 0
+      tickInterval: 0
     };
   },
   components: {
@@ -46,15 +45,10 @@ export default Vue.extend({
   mounted() {
     this.tickInterval = window.setInterval(() => this.tick(), 100);
     document.addEventListener("keydown", this.onEvent);
-    this.frameInterval = window.setInterval(
-      () => this.$store.commit("nextFrame"),
-      700
-    );
   },
   beforeDestroy() {
     window.clearInterval(this.tickInterval);
     document.removeEventListener("keydown", this.onEvent);
-    window.clearInterval(this.frameInterval);
   }
 });
 </script>

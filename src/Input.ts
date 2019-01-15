@@ -21,6 +21,36 @@ export class GoToInputCommand extends InputCommand {
   }
 }
 
+export class OpenFacilitiesInputCommand extends InputCommand {
+  public call(game: Game): Game {
+    game.input = new FacilitiesInput(game.pause)
+    game.pause = true
+    game.drawer.showCursor = true
+    return game
+  }
+}
+
+export class CloseFacilitiesInputCommand extends InputCommand {
+  constructor(private input: FacilitiesInput) {
+    super()
+  }
+
+  public call(game: Game): Game {
+    game.input = new FacilitiesInput(game.pause)
+    game.pause = this.input.oldPauseState
+    game.drawer.showCursor = false
+    game.input = new IdleInput()
+    return game
+  }
+}
+
+export class TogglePause extends InputCommand {
+  public call(game: Game): Game {
+    game.pause = !game.pause
+    return game
+  }
+}
+
 export abstract class Input {
   public abstract options(game: Game): { [key: string]: string }
   public abstract process(key: string): InputCommand
@@ -34,15 +64,37 @@ const idleCommand = new IdInputCommand()
 
 export class IdleInput extends Input {
   public options(game: Game): { [key: string]: string } {
-    return {
-      u: "Units"
-    }
+    return { u: "Units", f: "Facilities", space: "Pause" }
   }
 
   public process(key: string): InputCommand {
     switch (key) {
       case "u":
         return new GoToInputCommand(new UnitsInput())
+      case "f":
+        return new OpenFacilitiesInputCommand()
+      case " ":
+        return new TogglePause()
+      default:
+        return idleCommand
+    }
+  }
+}
+
+export class FacilitiesInput extends Input {
+  constructor(public oldPauseState: boolean) {
+    super()
+  }
+
+  public options(game: Game): { [key: string]: string } {
+    return {}
+  }
+
+  public process(key: string): InputCommand {
+    switch (key) {
+      case "Escape":
+        // TODO: restore old pause state
+        return new CloseFacilitiesInputCommand(this)
 
       default:
         return idleCommand

@@ -11,15 +11,11 @@ import { Game, ship } from "./Ship"
 
 const store = new Vuex.Store({
   state: {
-    game: new Game(ship),
-    frame: 0
+    game: new Game(ship)
   },
   mutations: {
     keyboardEvent(state, event: KeyboardEvent) {
       state.game = state.game.input.process(event.key).call(state.game)
-    },
-    nextFrame(state) {
-      state.frame += 1
     }
   }
 })
