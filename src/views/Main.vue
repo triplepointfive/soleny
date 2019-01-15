@@ -1,7 +1,7 @@
 <template lang="pug">
 .container
   #scene
-    Scene(:ship='game.ship')
+    Scene
   #aside
     section#panel
       SideMenu

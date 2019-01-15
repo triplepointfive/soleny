@@ -1,4 +1,11 @@
-import { concat, flatMapDeep, isEqual, uniqWith, flatMap, filter } from "lodash"
+import {
+  includes,
+  flatMapDeep,
+  isEqual,
+  uniqWith,
+  flatMap,
+  filter
+} from "lodash"
 import { Input, IdleInput } from "../inputs/Input"
 import { Point } from "../lib/Point"
 import { Direction } from "../lib/Direction"
@@ -127,8 +134,10 @@ export class PassableTileVisitor extends TileVisitor<boolean> {
   }
 }
 
+export type CreatureId = number
+
 export class Creature {
-  constructor(public pos: Point) {}
+  constructor(public id: CreatureId, public pos: Point) {}
 }
 
 export interface Drawable {
@@ -302,13 +311,14 @@ export class WeaponSystemConstruction extends Construction {
 export class Ship {
   public creatures: Creature[] = []
   public constructions: Construction[] = []
+  public actedCreatures: CreatureId[] = []
 
   constructor(
     public plan: ShipTile[],
     public width: number,
     public height: number
   ) {
-    this.creatures = [new Creature(new Point(10, 1))]
+    this.creatures = [new Creature(0, new Point(10, 1))]
     this.constructions = [
       new DoorSystem(new Point(5, 13)),
       new WeaponSystemConstruction(new Point(6, 18))
@@ -336,12 +346,18 @@ export class Ship {
   }
 
   public tick(): void {
-    this.creatures.forEach(creature => {
+    let creature = this.creatures.find(
+      ({ id }: Creature) => !includes(this.actedCreatures, id)
+    )
+
+    if (creature) {
       const nextPos = findPath(creature.pos, new Point(7, 19), this)
       if (nextPos) {
         creature.pos = nextPos
       }
-    })
+    } else {
+      this.actedCreatures = []
+    }
   }
 }
 

@@ -2,17 +2,17 @@ import { Game } from "../models/Ship"
 import { Input, FacilitiesInput, IdleInput } from "../inputs/Input"
 import { Direction } from "../lib/Direction"
 
-export abstract class InputCommand {
+export abstract class GameCommand {
   public abstract call(game: Game): Game
 }
 
-export class IdInputCommand extends InputCommand {
+export class IdInputCommand extends GameCommand {
   public call(game: Game): Game {
     return game
   }
 }
 
-export class GoToInputCommand extends InputCommand {
+export class GoToInputCommand extends GameCommand {
   constructor(protected input: Input) {
     super()
   }
@@ -23,7 +23,7 @@ export class GoToInputCommand extends InputCommand {
   }
 }
 
-export class OpenFacilitiesInputCommand extends InputCommand {
+export class OpenFacilitiesInputCommand extends GameCommand {
   public call(game: Game): Game {
     game.input = new FacilitiesInput(game.pause)
     game.pause = true
@@ -32,7 +32,7 @@ export class OpenFacilitiesInputCommand extends InputCommand {
   }
 }
 
-export class CloseFacilitiesInputCommand extends InputCommand {
+export class CloseFacilitiesInputCommand extends GameCommand {
   constructor(private input: FacilitiesInput) {
     super()
   }
@@ -46,7 +46,7 @@ export class CloseFacilitiesInputCommand extends InputCommand {
   }
 }
 
-export class MoveCursorInputCommand extends InputCommand {
+export class MoveCursorInputCommand extends GameCommand {
   constructor(private direction: Direction) {
     super()
   }
@@ -57,7 +57,7 @@ export class MoveCursorInputCommand extends InputCommand {
   }
 }
 
-export class TogglePauseCommand extends InputCommand {
+export class TogglePauseCommand extends GameCommand {
   public call(game: Game): Game {
     game.pause = !game.pause
     return game

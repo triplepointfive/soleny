@@ -1,6 +1,6 @@
 import { Game } from "../models/Ship"
 import {
-  InputCommand,
+  GameCommand,
   GoToInputCommand,
   IdInputCommand,
   OpenFacilitiesInputCommand,
@@ -12,9 +12,9 @@ import { Direction } from "../lib/Direction"
 
 export abstract class Input {
   public abstract options(game: Game): { [key: string]: string }
-  public abstract process(key: string): InputCommand
+  public abstract process(key: string): GameCommand
 
-  protected goIdle(): InputCommand {
+  protected goIdle(): GameCommand {
     return new GoToInputCommand(new IdleInput())
   }
 }
@@ -26,7 +26,7 @@ export class IdleInput extends Input {
     return { u: "Units", f: "Facilities", space: "Pause" }
   }
 
-  public process(key: string): InputCommand {
+  public process(key: string): GameCommand {
     switch (key) {
       case "u":
         return new GoToInputCommand(new UnitsInput())
@@ -49,7 +49,7 @@ export class FacilitiesInput extends Input {
     return {}
   }
 
-  public process(key: string): InputCommand {
+  public process(key: string): GameCommand {
     switch (key) {
       case "Escape":
         // TODO: restore old pause state
@@ -81,7 +81,7 @@ export class UnitsInput extends Input {
     return creatures
   }
 
-  public process(key: string): InputCommand {
+  public process(key: string): GameCommand {
     switch (key) {
       case "Escape":
         return this.goIdle()
