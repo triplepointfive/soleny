@@ -45,17 +45,29 @@ export default Vue.extend({
 
 <style lang="scss">
 .plan-tile {
-  font-size: 2rem;
+  font-size: 30px;
   display: inline-block;
   width: 22px;
+  height: 32px;
+  text-align: center;
+  vertical-align: top;
   text-align: center;
 
   &.-wall {
+    background: darkgrey;
+    color: darkgrey;
+  }
+
+  &.-construction {
     background: grey;
     color: black;
   }
 
-  &.-door,
+  &.-door {
+    background: grey;
+    color: black;
+  }
+
   &.-floor {
     background: grey;
     color: lightgrey;

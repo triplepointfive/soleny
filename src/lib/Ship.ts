@@ -105,7 +105,7 @@ export class SymbolTileVisitor extends TileVisitor<string> {
 
 export class StyleTileVisitor extends TileVisitor<string> {
   public visitConstruction(construction: ConstructionTile): string {
-    return "-wall"
+    return "-construction"
   }
 
   public visitDoor(door: Door): string {
@@ -294,17 +294,15 @@ export class DoorSystem extends Construction {
   }
 
   public tileAt({ x, y }: Point): ConstructionTile {
-    //      ║··#··#··#
-    //      ╚═+#··#+##
     switch ([x - this.pos.x, y - this.pos.y].join(" ")) {
       case "0 0":
-        return new ConstructionTile(false, "║")
+        return new ConstructionTile(false, "╔")
       case "0 1":
-        return new ConstructionTile(false, "╚")
+        return new ConstructionTile(false, "╙")
       case "1 0":
-        return new ConstructionTile(false, "E")
+        return new ConstructionTile(false, "╕")
       case "1 1":
-        return new ConstructionTile(false, "═")
+        return new ConstructionTile(true, "∅")
       default:
         return new ConstructionTile(false, "E")
     }
@@ -334,7 +332,7 @@ export class Ship {
 
   public tick(): void {
     this.creatures.forEach(creature => {
-      const nextPos = findPath(creature.pos, new Point(7, 1), this)
+      const nextPos = findPath(creature.pos, new Point(2, 5), this)
       if (nextPos) {
         creature.pos = nextPos
       }

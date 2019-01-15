@@ -72,7 +72,8 @@ export default Vue.extend({
 
     .row {
       margin: 0;
-      font-family: "Anonymous Pro", monospace;
+      //font-family: "Anonymous Pro", monospace;
+      font-family: "DejaVu Sans Mono", arial;
     }
   }
 
