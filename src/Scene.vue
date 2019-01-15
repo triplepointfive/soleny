@@ -59,7 +59,7 @@ export default Vue.extend({
       const pos = new Point(x, y);
 
       if (this.drawer.isCursor(pos)) {
-        return new Tile("X", 120, 220, 120);
+        return new Tile("Ｘ", 120, 220, 120);
       }
 
       const cell = this.drawer.draw(pos);

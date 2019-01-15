@@ -1,4 +1,4 @@
-import { Game } from "./Ship"
+import { Game, Direction } from "./Ship"
 
 export abstract class InputCommand {
   public abstract call(game: Game): Game
@@ -40,6 +40,17 @@ export class CloseFacilitiesInputCommand extends InputCommand {
     game.pause = this.input.oldPauseState
     game.drawer.showCursor = false
     game.input = new IdleInput()
+    return game
+  }
+}
+
+export class MoveCursorInputCommand extends InputCommand {
+  constructor(private direction: Direction) {
+    super()
+  }
+
+  public call(game: Game): Game {
+    game.drawer.moveCursor(this.direction)
     return game
   }
 }
@@ -95,6 +106,15 @@ export class FacilitiesInput extends Input {
       case "Escape":
         // TODO: restore old pause state
         return new CloseFacilitiesInputCommand(this)
+
+      case "ArrowLeft":
+        return new MoveCursorInputCommand(Direction.left)
+      case "ArrowRight":
+        return new MoveCursorInputCommand(Direction.right)
+      case "ArrowUp":
+        return new MoveCursorInputCommand(Direction.up)
+      case "ArrowDown":
+        return new MoveCursorInputCommand(Direction.down)
 
       default:
         return idleCommand
