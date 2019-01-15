@@ -121,6 +121,24 @@ export class StyleTileVisitor extends TileVisitor<string> {
   }
 }
 
+export class PassableTileVisitor extends TileVisitor<boolean> {
+  public visitConstruction({ passable }: ConstructionTile): boolean {
+    return passable
+  }
+
+  public visitDoor(door: Door): boolean {
+    return true
+  }
+
+  public visitWall(door: Wall): boolean {
+    return false
+  }
+
+  public visitFloor(door: Floor): boolean {
+    return true
+  }
+}
+
 export class Point {
   constructor(public x: number, public y: number) {}
 
@@ -191,17 +209,6 @@ export class Drawer {
   constructor(protected ship: Ship) {}
 
   public draw(pos: Point): Drawable {
-    const construction = ship.constructions.find(construction =>
-      construction.isIntersectional(pos)
-    )
-
-    if (construction) {
-      return {
-        tile: construction.tileAt(pos),
-        creatures: this.ship.creaturesAt(pos)
-      }
-    }
-
     return {
       tile: this.ship.tileAt(pos),
       creatures: this.ship.creaturesAt(pos)
@@ -220,15 +227,16 @@ const findPath = function(
 
   let mask: Array<undefined | number> = []
 
-  let turn = 0
-  let toCheck = [pos]
-  let newPosToCheck: Point[] = []
+  let turn = 0,
+    toCheck = [pos],
+    newPosToCheck: Point[] = [],
+    passableVisitor = new PassableTileVisitor()
 
   while (toCheck.length && mask[dest.x + dest.y * ship.width] === undefined) {
     toCheck.forEach(checkPos => {
       const tile = ship.tileAt(checkPos)
 
-      if (tile instanceof Door || tile instanceof Floor) {
+      if (tile.visit(passableVisitor)) {
         mask[checkPos.x + checkPos.y * ship.width] = turn
         newPosToCheck.push(checkPos)
       } else {
@@ -275,14 +283,7 @@ export abstract class Construction {
   constructor(public pos: Point) {}
 
   abstract get size(): Point
-  public abstract isIntersectional({ x, y }: Point): boolean
   public abstract tileAt({ x, y }: Point): ConstructionTile
-}
-
-export class DoorSystem extends Construction {
-  get size(): Point {
-    return new Point(2, 2)
-  }
 
   public isIntersectional({ x, y }: Point): boolean {
     return (
@@ -291,6 +292,12 @@ export class DoorSystem extends Construction {
       y >= this.pos.y &&
       y < this.pos.y + this.size.y
     )
+  }
+}
+
+export class DoorSystem extends Construction {
+  get size(): Point {
+    return new Point(2, 2)
   }
 
   public tileAt({ x, y }: Point): ConstructionTile {
@@ -327,6 +334,14 @@ export class Ship {
   }
 
   public tileAt(pos: Point): Tile {
+    const construction = this.constructions.find(construction =>
+      construction.isIntersectional(pos)
+    )
+
+    if (construction) {
+      return construction.tileAt(pos)
+    }
+
     return this.plan[pos.x + pos.y * this.width]
   }
 
