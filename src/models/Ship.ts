@@ -1,5 +1,7 @@
 import { concat, flatMapDeep, isEqual, uniqWith, flatMap, filter } from "lodash"
-import { Input, IdleInput } from "./Input"
+import { Input, IdleInput } from "../inputs/Input"
+import { Point } from "../lib/Point"
+import { Direction } from "../lib/Direction"
 
 export abstract class TileVisitor<T> {
   public abstract visitConstruction(construction: ConstructionTile): T
@@ -122,85 +124,6 @@ export class PassableTileVisitor extends TileVisitor<boolean> {
 
   public visitFloor(door: Floor): boolean {
     return true
-  }
-}
-
-export class Point {
-  constructor(public x: number, public y: number) {}
-
-  public static readonly ortho = [
-    new Point(0, -1),
-    new Point(-1, 0),
-    new Point(1, 0),
-    new Point(0, 1)
-  ]
-
-  public static readonly diag = [
-    new Point(-1, -1),
-    new Point(1, -1),
-    new Point(-1, 1),
-    new Point(1, 1)
-  ]
-
-  public static readonly dxy = concat(Point.ortho, Point.diag)
-
-  public eq(point: Point): boolean {
-    return this.x === point.x && this.y === point.y
-  }
-
-  public nextTo(point: Point): boolean {
-    return Math.abs(this.x - point.x) <= 1 && Math.abs(this.y - point.y) <= 1
-  }
-
-  public copy(): Point {
-    return new Point(this.x, this.y)
-  }
-
-  public add(point: Point): Point {
-    return new Point(this.x + point.x, this.y + point.y)
-  }
-
-  public wrappers(): Point[] {
-    return Point.dxy.map(point => this.add(point))
-  }
-
-  public orthoWraps(): Point[] {
-    return Point.ortho.map(point => this.add(point))
-  }
-
-  public diagWraps(): Point[] {
-    return Point.diag.map(point => this.add(point))
-  }
-}
-
-export class Direction extends Point {
-  private constructor(x: number, y: number) {
-    super(x, y)
-  }
-
-  static readonly up = new Direction(0, -1)
-  static readonly down = new Direction(0, 1)
-  static readonly left = new Direction(-1, 0)
-  static readonly right = new Direction(1, 0)
-
-  static readonly upLeft = new Direction(-1, -1)
-  static readonly upRight = new Direction(1, -1)
-  static readonly downLeft = new Direction(-1, 1)
-  static readonly downRight = new Direction(1, 1)
-
-  static readonly all = [
-    Direction.up,
-    Direction.down,
-    Direction.left,
-    Direction.right,
-    Direction.upLeft,
-    Direction.upRight,
-    Direction.downLeft,
-    Direction.downRight
-  ]
-
-  public multiple(ratio: number): Point {
-    return new Point(this.x * ratio, this.y * ratio)
   }
 }
 

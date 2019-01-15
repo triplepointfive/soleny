@@ -1,13 +1,13 @@
 /* eslint-env browser */
-import "./assets/css/style.scss"
+import "./views/style.scss"
 
 import Vue from "vue"
 import Vuex from "vuex"
-import Main from "./Main.vue"
+import Main from "./views/Main.vue"
 
 Vue.use(Vuex)
 
-import { Game, ship } from "./Ship"
+import { Game, ship } from "./models/Ship"
 
 const store = new Vuex.Store({
   state: {

@@ -12,17 +12,18 @@ import {
   Engine,
   Viewport,
   Tile
-} from "../vendor/unicodetiles.ts/src/index";
+} from "../../vendor/unicodetiles.ts/src/index";
 
 import {
   SymbolTileVisitor,
   StyleTileVisitor,
   Drawable,
   Drawer,
-  Point,
   Game,
   Ship
-} from "./Ship";
+} from "../models/Ship";
+
+import { Point } from "../lib/Point";
 
 const styles: { [key: string]: Tile } = {
   "-wall": new Tile("#", 120, 120, 120, 120, 120, 120),
