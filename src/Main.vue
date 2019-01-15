@@ -1,13 +1,7 @@
 <template lang="pug">
 .container
   #scene
-    .row(v-for='j in game.ship.height')
-      Tile(
-        v-for='i in game.ship.width'
-        :pos='{ x: i - 1, y: j - 1 }'
-        :drawer='drawer'
-        :key='i + "-" + j'
-        )
+    Scene(:ship='game.ship')
   #aside
     section#panel
       SideMenu
@@ -18,7 +12,7 @@
 
 <script lang="ts">
 import Vue, { Component } from "vue";
-import Tile from "./Tile.vue";
+import Scene from "./Scene.vue";
 
 import SideMenu from "./SideMenu.vue";
 
@@ -28,14 +22,13 @@ export default Vue.extend({
   name: "Main",
   data() {
     return {
-      drawer: new Drawer(ship),
       tickInterval: 0,
       frameInterval: 0
     };
   },
   components: {
-    Tile,
-    SideMenu
+    SideMenu,
+    Scene
   },
   computed: {
     game(): Game {
