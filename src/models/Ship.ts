@@ -273,6 +273,32 @@ export class DoorSystem extends Construction {
   }
 }
 
+export class WeaponSystemConstruction extends Construction {
+  public static tiles: { [key: string]: ConstructionTile } = {
+    "0 0": new ConstructionTile(false, "╔"),
+    "1 0": new ConstructionTile(false, "╤"),
+    "2 0": new ConstructionTile(false, "╗"),
+    "0 1": new ConstructionTile(false, "╟"),
+    "1 1": new ConstructionTile(true, "∅"),
+    "2 1": new ConstructionTile(false, "╢"),
+    "0 2": new ConstructionTile(false, "⊑"),
+    "1 2": new ConstructionTile(true, " "),
+    "2 2": new ConstructionTile(false, "⊒")
+  }
+
+  get size(): Point {
+    return new Point(3, 3)
+  }
+
+  public tileAt({ x, y }: Point): ConstructionTile {
+    return (
+      WeaponSystemConstruction.tiles[
+        [x - this.pos.x, y - this.pos.y].join(" ")
+      ] || new ConstructionTile(false, "E")
+    )
+  }
+}
+
 export class Ship {
   public creatures: Creature[] = []
   public constructions: Construction[] = []
@@ -283,7 +309,10 @@ export class Ship {
     public height: number
   ) {
     this.creatures = [new Creature(new Point(10, 1))]
-    this.constructions = [new DoorSystem(new Point(5, 13))]
+    this.constructions = [
+      new DoorSystem(new Point(5, 13)),
+      new WeaponSystemConstruction(new Point(6, 18))
+    ]
   }
 
   public creaturesAt(pos: Point): Creature[] {
@@ -308,7 +337,7 @@ export class Ship {
 
   public tick(): void {
     this.creatures.forEach(creature => {
-      const nextPos = findPath(creature.pos, new Point(6, 14), this)
+      const nextPos = findPath(creature.pos, new Point(7, 19), this)
       if (nextPos) {
         creature.pos = nextPos
       }
