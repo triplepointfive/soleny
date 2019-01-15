@@ -13,10 +13,9 @@
 <script lang="ts">
 import Vue, { Component } from "vue";
 import Scene from "./Scene.vue";
-
 import SideMenu from "./SideMenu.vue";
 
-import { ship, Game, Ship, Drawer } from "./Ship";
+import { Game } from "../models/Ship";
 
 export default Vue.extend({
   name: "Main",

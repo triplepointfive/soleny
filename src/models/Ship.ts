@@ -129,7 +129,7 @@ export class PassableTileVisitor extends TileVisitor<boolean> {
     return false
   }
 
-  public visitFloor(door: Floor): boolean {
+  public visitFloor(floor: Floor): boolean {
     return true
   }
 }

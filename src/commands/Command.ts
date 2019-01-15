@@ -1,5 +1,5 @@
 import { Game } from "../models/Ship"
-import { Input, FacilitiesInput, IdleInput } from "../inputs/Input"
+import { Input, FacilitiesInput, IdleInput, UnitsInput } from "../inputs/Input"
 import { Direction } from "../lib/Direction"
 
 export abstract class GameCommand {
@@ -28,6 +28,15 @@ export class OpenFacilitiesInputCommand extends GameCommand {
     game.input = new FacilitiesInput(game.pause)
     game.pause = true
     game.drawer.showCursor = true
+    return game
+  }
+}
+
+export class OpenUnitsInputCommand extends GameCommand {
+  public call(game: Game): Game {
+    game.input = new UnitsInput(game.ship.creatures, game.pause)
+    game.pause = true
+    // game.drawer.showCursor = true
     return game
   }
 }

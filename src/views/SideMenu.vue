@@ -13,7 +13,7 @@ export default Vue.extend({
   name: "SideMenu",
   computed: {
     options(): object {
-      return this.$store.state.game.input.options(this.$store.state.game);
+      return this.$store.state.game.input.options;
     }
   }
 });

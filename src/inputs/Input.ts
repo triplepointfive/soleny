@@ -1,4 +1,4 @@
-import { Game } from "../models/Ship"
+import { Game, Creature } from "../models/Ship"
 import {
   GameCommand,
   GoToInputCommand,
@@ -6,12 +6,14 @@ import {
   OpenFacilitiesInputCommand,
   TogglePauseCommand,
   CloseFacilitiesInputCommand,
-  MoveCursorInputCommand
+  MoveCursorInputCommand,
+  OpenUnitsInputCommand
 } from "../commands/Command"
 import { Direction } from "../lib/Direction"
+import { mapValues, find } from "lodash"
 
 export abstract class Input {
-  public abstract options(game: Game): { [key: string]: string }
+  abstract get options(): { [key: string]: string }
   public abstract process(key: string): GameCommand
 
   protected goIdle(): GameCommand {
@@ -22,14 +24,14 @@ export abstract class Input {
 const idleCommand = new IdInputCommand()
 
 export class IdleInput extends Input {
-  public options(game: Game): { [key: string]: string } {
+  get options(): { [key: string]: string } {
     return { u: "Units", f: "Facilities", space: "Pause" }
   }
 
   public process(key: string): GameCommand {
     switch (key) {
       case "u":
-        return new GoToInputCommand(new UnitsInput())
+        return new OpenUnitsInputCommand()
       case "f":
         return new OpenFacilitiesInputCommand()
       case " ":
@@ -45,14 +47,13 @@ export class FacilitiesInput extends Input {
     super()
   }
 
-  public options(game: Game): { [key: string]: string } {
+  public get options(): { [key: string]: string } {
     return {}
   }
 
   public process(key: string): GameCommand {
     switch (key) {
       case "Escape":
-        // TODO: restore old pause state
         return new CloseFacilitiesInputCommand(this)
 
       case "ArrowLeft":
@@ -71,20 +72,55 @@ export class FacilitiesInput extends Input {
 }
 
 export class UnitsInput extends Input {
-  public options(game: Game): { [key: string]: string } {
-    let creatures: { [key: string]: string } = {}
+  public readonly units: { [key: string]: Creature }
 
-    game.ship.creatures.forEach((creature, i) => {
-      creatures[String.fromCharCode(97 + i)] = "Human"
+  constructor(units: Creature[], public oldPauseState: boolean) {
+    super()
+
+    this.units = {}
+
+    units.forEach((unit, i) => {
+      this.units[String.fromCharCode(97 + i)] = unit
     })
+  }
 
-    return creatures
+  get options(): { [key: string]: string } {
+    return mapValues(this.units, unit => "Human")
   }
 
   public process(key: string): GameCommand {
     switch (key) {
       case "Escape":
+        // TODO: restore old pause state
         return this.goIdle()
+
+      default:
+        const creature = find(this.units, (unit, symbol) => symbol === key)
+        if (creature) {
+          return new GoToInputCommand(new UnitInput(creature, this))
+        }
+
+        return idleCommand
+    }
+  }
+}
+
+export class UnitInput extends Input {
+  constructor(public unit: Creature, private previousInput: Input) {
+    super()
+  }
+
+  get options(): { [key: string]: string } {
+    return {
+      "1": "Operate doors",
+      "2": "Load ammo"
+    }
+  }
+
+  public process(key: string): GameCommand {
+    switch (key) {
+      case "Escape":
+        return new GoToInputCommand(this.previousInput)
 
       default:
         return idleCommand
