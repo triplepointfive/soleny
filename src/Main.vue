@@ -22,14 +22,15 @@ import Tile from "./Tile.vue";
 
 import SideMenu from "./SideMenu.vue";
 
-import { ship, Game, Ship, Drawer } from "./lib/Ship";
+import { ship, Game, Ship, Drawer } from "./Ship";
 
 export default Vue.extend({
   name: "Main",
   data() {
     return {
       drawer: new Drawer(ship),
-      tickInterval: 0
+      tickInterval: 0,
+      frameInterval: 0
     };
   },
   components: {
@@ -52,10 +53,15 @@ export default Vue.extend({
   mounted() {
     this.tickInterval = window.setInterval(() => this.tick(), 100);
     document.addEventListener("keydown", this.onEvent);
+    this.frameInterval = window.setInterval(
+      () => this.$store.commit("nextFrame"),
+      700
+    );
   },
   beforeDestroy() {
     window.clearInterval(this.tickInterval);
     document.removeEventListener("keydown", this.onEvent);
+    window.clearInterval(this.frameInterval);
   }
 });
 </script>
@@ -67,8 +73,8 @@ export default Vue.extend({
 
   #scene {
     position: absolute;
-    left: 25%;
-    transform: translate(50%, 0);
+    width: 75%;
+    text-align: center;
 
     .row {
       margin: 0;

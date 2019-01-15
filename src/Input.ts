@@ -1,4 +1,4 @@
-import { Game } from "./lib/Ship"
+import { Game } from "./Ship"
 
 export abstract class InputCommand {
   public abstract call(game: Game): Game

@@ -1,48 +1,12 @@
-import { last, isEqual, uniqWith, flatMap, filter } from "lodash"
-import { Input, IdleInput } from "../Input"
+import { flatMapDeep, isEqual, uniqWith, flatMap, filter } from "lodash"
+import { Input, IdleInput } from "./Input"
 
-// export class Ship {}
-
-// export class Tile
-
-// export default `
-//         ####
-//         #··#
-//         #··#
-//         #··#
-//         #··#
-//         #++#
-//         #··#
-//      ####··####
-//      #··+··+··#
-//      #··#··#··#
-//      #··####··#
-//      #··#  #··#
-//    ###++#++#++###
-//    #····#··#····#
-//    #····#··#····#
-//    #····#··#····#
-//    #····#··#····#
-//    #+##########+#
-//    #····#··#····#
-// ####····#··#····####
-// #··+····#··#····+··#
-// #··+····#··#····+··#
-// #··###++####++###··#
-// #··# #··#  #··# #··#
-// ╚### #··####··# ####
-//      #··+··+··#
-//      ║··#··#··#
-//      ╚═+#··#+##
-//         #··#
-//         ╚###
-// `
-//
 export abstract class TileVisitor<T> {
   public abstract visitConstruction(construction: ConstructionTile): T
   public abstract visitDoor(door: Door): T
   public abstract visitWall(door: Wall): T
   public abstract visitFloor(door: Floor): T
+  public abstract visitSpace(space: Space): T
 }
 
 export abstract class Tile {
@@ -56,6 +20,12 @@ export class ConstructionTile extends Tile {
 
   public visit<T>(visitor: TileVisitor<T>): T {
     return visitor.visitConstruction(this)
+  }
+}
+
+export class Space extends Tile {
+  public visit<T>(visitor: TileVisitor<T>): T {
+    return visitor.visitSpace(this)
   }
 }
 
@@ -82,6 +52,10 @@ export class Floor extends Tile {
 }
 
 export class SymbolTileVisitor extends TileVisitor<string> {
+  public visitSpace(space: Space): string {
+    return " "
+  }
+
   public visitConstruction({ symbol }: ConstructionTile): string {
     return symbol
   }
@@ -104,6 +78,10 @@ export class SymbolTileVisitor extends TileVisitor<string> {
 }
 
 export class StyleTileVisitor extends TileVisitor<string> {
+  public visitSpace(space: Space): string {
+    return "-space"
+  }
+
   public visitConstruction(construction: ConstructionTile): string {
     return "-construction"
   }
@@ -122,6 +100,10 @@ export class StyleTileVisitor extends TileVisitor<string> {
 }
 
 export class PassableTileVisitor extends TileVisitor<boolean> {
+  public visitSpace(space: Space): boolean {
+    return false
+  }
+
   public visitConstruction({ passable }: ConstructionTile): boolean {
     return passable
   }
@@ -203,6 +185,7 @@ export class Creature {
 export interface Drawable {
   tile: Tile
   creatures: Creature[]
+  selected: boolean
 }
 
 export class Drawer {
@@ -211,7 +194,8 @@ export class Drawer {
   public draw(pos: Point): Drawable {
     return {
       tile: this.ship.tileAt(pos),
-      creatures: this.ship.creaturesAt(pos)
+      creatures: this.ship.creaturesAt(pos),
+      selected: this.ship.isSelected(pos)
     }
   }
 }
@@ -325,8 +309,8 @@ export class Ship {
     public width: number,
     public height: number
   ) {
-    this.creatures = [new Creature(new Point(1, 1))]
-    this.constructions = [new DoorSystem(new Point(1, 4))]
+    this.creatures = [new Creature(new Point(10, 1))]
+    this.constructions = [new DoorSystem(new Point(5, 13))]
   }
 
   public creaturesAt(pos: Point): Creature[] {
@@ -345,9 +329,13 @@ export class Ship {
     return this.plan[pos.x + pos.y * this.width]
   }
 
+  public isSelected(pos: Point): boolean {
+    return false
+  }
+
   public tick(): void {
     this.creatures.forEach(creature => {
-      const nextPos = findPath(creature.pos, new Point(2, 5), this)
+      const nextPos = findPath(creature.pos, new Point(6, 14), this)
       if (nextPos) {
         creature.pos = nextPos
       }
@@ -378,78 +366,52 @@ export class Game {
   }
 }
 
-export let ship = new Ship(
+const plan: Tile[] = flatMapDeep(
   [
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-    new Wall(),
-    new Door(false),
-    new Wall(),
-    new Wall(),
-
-    new Wall(),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Door(false),
-    new Floor(),
-    new Floor(),
-    new Floor(),
-    new Wall(),
-
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall(),
-    new Wall()
+    "         ####         ",
+    "         #··#         ",
+    "         #··#         ",
+    "         #··#         ",
+    "         #··#         ",
+    "         #++#         ",
+    "         #··#         ",
+    "      ####··####      ",
+    "      #··+··+··#      ",
+    "      #··#··#··#      ",
+    "      #··####··#      ",
+    "      #··#  #··#      ",
+    "    ###++#++#++###    ",
+    "    #····+··+····#    ",
+    "    #····+··+····#    ",
+    "    #····#··#····#    ",
+    "    #····#··#····#    ",
+    "    #+##########+#    ",
+    "    #····#··#····#    ",
+    " ####····#··#····#### ",
+    " #··+····+··+····+··# ",
+    " #··+····+··+····+··# ",
+    " #··###++####++###··# ",
+    " #··# #··#  #··# #··# ",
+    " #### #··####··# #### ",
+    "      #··+··+··#      ",
+    "      #··#··#··#      ",
+    "      ##+#··#+##      ",
+    "         #··#         ",
+    "         ####         "
   ],
-  9,
-  7
+  row => {
+    return row.split("").map(symbol => {
+      switch (symbol) {
+        case "#":
+          return new Wall()
+        case "+":
+          return new Door(false)
+        case " ":
+          return new Space()
+        default:
+          return new Floor()
+      }
+    })
+  }
 )
+export let ship = new Ship(plan, 22, 30)

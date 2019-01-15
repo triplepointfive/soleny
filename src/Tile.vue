@@ -6,12 +6,7 @@
 <script lang="ts">
 import Vue from "vue";
 
-import {
-  SymbolTileVisitor,
-  Tile,
-  StyleTileVisitor,
-  Drawable
-} from "./lib/Ship";
+import { SymbolTileVisitor, Tile, StyleTileVisitor, Drawable } from "./Ship";
 
 const symbolizer = new SymbolTileVisitor();
 const styler = new StyleTileVisitor();
@@ -32,11 +27,21 @@ export default Vue.extend({
         return "";
       }
     },
-    tileClass(): string {
+    tileClass(): { [key: string]: boolean } {
       if (this.drawable.tile) {
-        return this.drawable.tile.visit(styler);
+        let classes = {
+          [this.drawable.tile.visit(styler)]: true
+        };
+
+        if (this.drawable.selected) {
+          classes[
+            this.$store.state.frame % 2 == 1 ? "-frame1" : "-frame2"
+          ] = true;
+        }
+
+        return classes;
       } else {
-        return "";
+        return {};
       }
     }
   }
@@ -61,6 +66,14 @@ export default Vue.extend({
   &.-construction {
     background: grey;
     color: black;
+
+    &.-frame1 {
+      color: darkgreen;
+    }
+
+    &.-frame2 {
+      color: darkred;
+    }
   }
 
   &.-door {
