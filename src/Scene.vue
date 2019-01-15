@@ -25,7 +25,9 @@ import { Drawer, Point } from "./Ship";
 import { SymbolTileVisitor, StyleTileVisitor, Drawable } from "./Ship";
 
 const styles: { [key: string]: Tile } = {
-  "-wall": new Tile("#", 120, 120, 120, 120, 120, 120)
+  "-wall": new Tile("#", 120, 120, 120, 120, 120, 120),
+  "-open-door": new Tile("＋", 120, 120, 120, 0, 0, 0),
+  "-close-door": new Tile("－", 0, 0, 0, 120, 120, 120)
 };
 
 const symbolizer = new SymbolTileVisitor();

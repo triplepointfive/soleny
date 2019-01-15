@@ -9,11 +9,11 @@ export abstract class TileVisitor<T> {
   public abstract visitSpace(space: Space): T
 }
 
-export abstract class Tile {
+export abstract class ShipTile {
   public abstract visit<T>(visitor: TileVisitor<T>): T
 }
 
-export class ConstructionTile extends Tile {
+export class ConstructionTile extends ShipTile {
   constructor(public passable: boolean, public symbol: string) {
     super()
   }
@@ -23,13 +23,13 @@ export class ConstructionTile extends Tile {
   }
 }
 
-export class Space extends Tile {
+export class Space extends ShipTile {
   public visit<T>(visitor: TileVisitor<T>): T {
     return visitor.visitSpace(this)
   }
 }
 
-export class Door extends Tile {
+export class Door extends ShipTile {
   constructor(public open: boolean) {
     super()
   }
@@ -39,13 +39,13 @@ export class Door extends Tile {
   }
 }
 
-export class Wall extends Tile {
+export class Wall extends ShipTile {
   public visit<T>(visitor: TileVisitor<T>): T {
     return visitor.visitWall(this)
   }
 }
 
-export class Floor extends Tile {
+export class Floor extends ShipTile {
   public visit<T>(visitor: TileVisitor<T>): T {
     return visitor.visitFloor(this)
   }
@@ -87,7 +87,11 @@ export class StyleTileVisitor extends TileVisitor<string> {
   }
 
   public visitDoor(door: Door): string {
-    return "-door"
+    if (door.open) {
+      return "-open-door"
+    } else {
+      return "-close-door"
+    }
   }
 
   public visitWall(wall: Wall): string {
@@ -183,7 +187,7 @@ export class Creature {
 }
 
 export interface Drawable {
-  tile: Tile
+  tile: ShipTile
   creatures: Creature[]
   selected: boolean
 }
@@ -305,7 +309,7 @@ export class Ship {
   public constructions: Construction[] = []
 
   constructor(
-    public plan: Tile[],
+    public plan: ShipTile[],
     public width: number,
     public height: number
   ) {
@@ -317,7 +321,7 @@ export class Ship {
     return filter(this.creatures, creature => creature.pos.eq(pos))
   }
 
-  public tileAt(pos: Point): Tile {
+  public tileAt(pos: Point): ShipTile {
     const construction = this.constructions.find(construction =>
       construction.isIntersectional(pos)
     )
@@ -366,14 +370,14 @@ export class Game {
   }
 }
 
-const plan: Tile[] = flatMapDeep(
+const plan: ShipTile[] = flatMapDeep(
   [
     "         ####         ",
     "         #··#         ",
     "         #··#         ",
     "         #··#         ",
     "         #··#         ",
-    "         #++#         ",
+    "         #+-#         ",
     "         #··#         ",
     "      ####··####      ",
     "      #··+··+··#      ",
@@ -406,6 +410,8 @@ const plan: Tile[] = flatMapDeep(
           return new Wall()
         case "+":
           return new Door(false)
+        case "-":
+          return new Door(true)
         case " ":
           return new Space()
         default:
