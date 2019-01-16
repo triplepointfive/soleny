@@ -12,7 +12,7 @@ import {
   Engine,
   Viewport,
   Tile
-} from "../../vendor/unicodetiles.ts/src/index";
+} from "unicodetiles.ts";
 
 import {
   SymbolTileVisitor,
@@ -40,7 +40,7 @@ export default Vue.extend({
     return {
       term: null,
       eng: null,
-      drawInterval: null,
+      drawInterval: 0,
       interval: 100
     };
   },
@@ -100,15 +100,13 @@ export default Vue.extend({
       //   return this.lighting(tile, x, y, time);
       // });
 
-      clearInterval(this.drawInterval);
-      this.drawInterval = setInterval(() => {
+      window.clearInterval(this.drawInterval);
+      this.drawInterval = window.setInterval(() => {
         this.drawScene();
       }, this.interval);
     },
     drawScene() {
-      //this.eng.update(this.pos.x, this.pos.y);
       this.eng.update(this.term.cx, this.term.cy);
-      //this.eng.update(0, 0);
       this.term.render();
     },
     lighting(tile, x, y, time) {
@@ -128,7 +126,7 @@ export default Vue.extend({
     this.initViewport();
   },
   beforeDestroy() {
-    clearInterval(this.drawInterval);
+    window.clearInterval(this.drawInterval);
   }
 });
 </script>
