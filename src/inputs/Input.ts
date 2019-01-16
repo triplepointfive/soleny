@@ -66,6 +66,7 @@ export class FacilitiesInput extends Input {
 
   public process(key: string): GameCommand {
     switch (key) {
+      case "Backspace":
       case "Escape":
         return new CloseFacilitiesInputCommand(this)
 
@@ -105,6 +106,7 @@ export class UnitsInput extends Input {
 
   public process(key: string): GameCommand {
     switch (key) {
+      case "Backspace":
       case "Escape":
         // TODO: restore old pause state
         return this.goIdle()
@@ -155,6 +157,7 @@ export class UnitInput extends Input {
 
   public process(key: string): GameCommand {
     switch (key) {
+      case "Backspace":
       case "Escape":
         return new GoToInputCommand(this.previousInput)
 
