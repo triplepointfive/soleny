@@ -1,4 +1,4 @@
-import { Game, Creature } from "../models/Ship"
+import { Creature } from "../models/Ship"
 import {
   GameCommand,
   GoToInputCommand,
@@ -7,13 +7,22 @@ import {
   TogglePauseCommand,
   CloseFacilitiesInputCommand,
   MoveCursorInputCommand,
-  OpenUnitsInputCommand
+  OpenUnitsInputCommand,
+  ToggleUnitLaborCommand
 } from "../commands/Command"
 import { Direction } from "../lib/Direction"
-import { mapValues, find } from "lodash"
+import { keyBy, map, mapValues, find } from "lodash"
+import { LaborType } from "../commands/Labor"
+
+export interface InputOption {
+  title: string
+  style?: string
+}
+
+export type InputOptions = { [key: string]: InputOption }
 
 export abstract class Input {
-  abstract get options(): { [key: string]: string }
+  abstract get options(): InputOptions
   public abstract process(key: string): GameCommand
 
   protected goIdle(): GameCommand {
@@ -24,8 +33,12 @@ export abstract class Input {
 const idleCommand = new IdInputCommand()
 
 export class IdleInput extends Input {
-  get options(): { [key: string]: string } {
-    return { u: "Units", f: "Facilities", space: "Pause" }
+  get options(): InputOptions {
+    return {
+      u: { title: "Units" },
+      f: { title: "Facilities" },
+      space: { title: "Pause" }
+    }
   }
 
   public process(key: string): GameCommand {
@@ -47,7 +60,7 @@ export class FacilitiesInput extends Input {
     super()
   }
 
-  public get options(): { [key: string]: string } {
+  public get options(): InputOptions {
     return {}
   }
 
@@ -84,8 +97,10 @@ export class UnitsInput extends Input {
     })
   }
 
-  get options(): { [key: string]: string } {
-    return mapValues(this.units, unit => "Human")
+  get options(): InputOptions {
+    return mapValues(this.units, unit => {
+      return { title: "Human" }
+    })
   }
 
   public process(key: string): GameCommand {
@@ -105,16 +120,37 @@ export class UnitsInput extends Input {
   }
 }
 
+const labors = [
+  {
+    title: "Operate doors",
+    type: LaborType.OperateDoor
+  },
+  {
+    title: "Shooting",
+    type: LaborType.ShootMissiles
+  },
+  {
+    title: "Navigation",
+    type: LaborType.Navigation
+  }
+]
+
 export class UnitInput extends Input {
   constructor(public unit: Creature, private previousInput: Input) {
     super()
   }
 
-  get options(): { [key: string]: string } {
-    return {
-      "1": "Operate doors",
-      "2": "Load ammo"
-    }
+  get options(): InputOptions {
+    return keyBy(
+      labors.map(({ title, type }, i) => {
+        return {
+          i,
+          title,
+          style: this.activeStyle(type)
+        }
+      }),
+      ({ i }) => String.fromCharCode(97 + i)
+    )
   }
 
   public process(key: string): GameCommand {
@@ -123,7 +159,18 @@ export class UnitInput extends Input {
         return new GoToInputCommand(this.previousInput)
 
       default:
+        const code = key.charCodeAt(0) - 97,
+          labor = labors[code]
+
+        if (labor) {
+          return new ToggleUnitLaborCommand(this.unit, labor.type)
+        }
+
         return idleCommand
     }
+  }
+
+  private activeStyle(labor: LaborType): string {
+    return this.unit.does(labor) ? "-active" : "-inactive"
   }
 }

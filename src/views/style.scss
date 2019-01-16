@@ -10,33 +10,3 @@ body {
   color: white;
   height: 100%;
 }
-
-* {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-.input-menu {
-  margin: 1rem;
-
-  >.menu-option {
-    >.key {
-      display: inline;
-      margin-right: 0.5rem;
-      color: orange;
-
-      &::before {
-        content: '[';
-      }
-
-      &::after {
-        content: ']';
-      }
-    }
-
-    >.value {
-      display: inline;
-    }
-  }
-}

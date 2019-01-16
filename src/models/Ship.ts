@@ -4,11 +4,13 @@ import {
   isEqual,
   uniqWith,
   flatMap,
-  filter
+  filter,
+  remove
 } from "lodash"
 import { Input, IdleInput } from "../inputs/Input"
 import { Point } from "../lib/Point"
 import { Direction } from "../lib/Direction"
+import { LaborType } from "../commands/Labor"
 
 export abstract class TileVisitor<T> {
   public abstract visitConstruction(construction: ConstructionTile): T
@@ -137,7 +139,21 @@ export class PassableTileVisitor extends TileVisitor<boolean> {
 export type CreatureId = number
 
 export class Creature {
+  private doesLabors: LaborType[] = []
+
   constructor(public id: CreatureId, public pos: Point) {}
+
+  public does(labor: LaborType): boolean {
+    return this.doesLabors.find(l => l === labor) !== undefined
+  }
+
+  public toggleLabor(labor: LaborType): void {
+    if (this.does(labor)) {
+      this.doesLabors = filter(this.doesLabors, l => l !== labor)
+    } else {
+      this.doesLabors.push(labor)
+    }
+  }
 }
 
 export interface Drawable {
@@ -282,7 +298,7 @@ export class DoorSystem extends Construction {
   }
 }
 
-export class WeaponSystemConstruction extends Construction {
+export class MissileSystemConstruction extends Construction {
   public static tiles: { [key: string]: ConstructionTile } = {
     "0 0": new ConstructionTile(false, "╔"),
     "1 0": new ConstructionTile(false, "╤"),
@@ -301,7 +317,7 @@ export class WeaponSystemConstruction extends Construction {
 
   public tileAt({ x, y }: Point): ConstructionTile {
     return (
-      WeaponSystemConstruction.tiles[
+      MissileSystemConstruction.tiles[
         [x - this.pos.x, y - this.pos.y].join(" ")
       ] || new ConstructionTile(false, "E")
     )
@@ -321,7 +337,7 @@ export class Ship {
     this.creatures = [new Creature(0, new Point(10, 1))]
     this.constructions = [
       new DoorSystem(new Point(5, 13)),
-      new WeaponSystemConstruction(new Point(6, 18))
+      new MissileSystemConstruction(new Point(6, 18))
     ]
   }
 
