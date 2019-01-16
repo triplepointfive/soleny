@@ -7185,6 +7185,10 @@ unicode-property-aliases-ecmascript@^1.0.4:
   version "2.1.1"
   resolved "https://github.com/triplepointfive/unicodetiles.js#29321de35d510515c85194e2dc15de4b5d8f66c4"
 
+"unicodetiles.ts@https://github.com/triplepointfive/unicodetiles.js#feb1fa1":
+  version "2.1.1"
+  resolved "https://github.com/triplepointfive/unicodetiles.js#feb1fa15f03965592e28b7e3a4c2e835079373b4"
+
 union-value@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/union-value/-/union-value-1.0.0.tgz#5c71c34cb5bad5dcebe3ea0cd08207ba5aa1aea4"

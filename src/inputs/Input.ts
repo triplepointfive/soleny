@@ -5,7 +5,6 @@ import {
   IdInputCommand,
   OpenFacilitiesInputCommand,
   TogglePauseCommand,
-  CloseFacilitiesInputCommand,
   MoveCursorInputCommand,
   OpenUnitsInputCommand,
   ToggleUnitLaborCommand,
@@ -71,7 +70,7 @@ export class FacilitiesInput extends PausedInput {
     switch (key) {
       case "Backspace":
       case "Escape":
-        return new CloseFacilitiesInputCommand(this)
+        return new ClosePausedInputCommand(this)
 
       case "ArrowLeft":
         return new MoveCursorInputCommand(Direction.left)
