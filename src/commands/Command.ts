@@ -1,5 +1,11 @@
 import { Game, Creature } from "../models/Ship"
-import { Input, FacilitiesInput, IdleInput, UnitsInput } from "../inputs/Input"
+import {
+  Input,
+  FacilitiesInput,
+  IdleInput,
+  UnitsInput,
+  PausedInput
+} from "../inputs/Input"
 import { Direction } from "../lib/Direction"
 import { LaborType } from "./Labor"
 
@@ -42,13 +48,12 @@ export class OpenUnitsInputCommand extends GameCommand {
   }
 }
 
-export class CloseFacilitiesInputCommand extends GameCommand {
-  constructor(private input: FacilitiesInput) {
+export class ClosePausedInputCommand extends GameCommand {
+  constructor(private input: PausedInput) {
     super()
   }
 
   public call(game: Game): Game {
-    game.input = new FacilitiesInput(game.pause)
     game.pause = this.input.oldPauseState
     game.drawer.showCursor = false
     game.input = new IdleInput()

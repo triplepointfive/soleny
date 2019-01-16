@@ -8,7 +8,8 @@ import {
   CloseFacilitiesInputCommand,
   MoveCursorInputCommand,
   OpenUnitsInputCommand,
-  ToggleUnitLaborCommand
+  ToggleUnitLaborCommand,
+  ClosePausedInputCommand
 } from "../commands/Command"
 import { Direction } from "../lib/Direction"
 import { keyBy, map, mapValues, find } from "lodash"
@@ -27,6 +28,12 @@ export abstract class Input {
 
   protected goIdle(): GameCommand {
     return new GoToInputCommand(new IdleInput())
+  }
+}
+
+export abstract class PausedInput extends Input {
+  constructor(public oldPauseState: boolean) {
+    super()
   }
 }
 
@@ -55,11 +62,7 @@ export class IdleInput extends Input {
   }
 }
 
-export class FacilitiesInput extends Input {
-  constructor(public oldPauseState: boolean) {
-    super()
-  }
-
+export class FacilitiesInput extends PausedInput {
   public get options(): InputOptions {
     return {}
   }
@@ -85,11 +88,11 @@ export class FacilitiesInput extends Input {
   }
 }
 
-export class UnitsInput extends Input {
+export class UnitsInput extends PausedInput {
   public readonly units: { [key: string]: Creature }
 
-  constructor(units: Creature[], public oldPauseState: boolean) {
-    super()
+  constructor(units: Creature[], oldPauseState: boolean) {
+    super(oldPauseState)
 
     this.units = {}
 
@@ -108,8 +111,7 @@ export class UnitsInput extends Input {
     switch (key) {
       case "Backspace":
       case "Escape":
-        // TODO: restore old pause state
-        return this.goIdle()
+        return new ClosePausedInputCommand(this)
 
       default:
         const creature = find(this.units, (unit, symbol) => symbol === key)
@@ -122,29 +124,29 @@ export class UnitsInput extends Input {
   }
 }
 
-const labors = [
-  {
-    title: "Operate doors",
-    type: LaborType.OperateDoor
-  },
-  {
-    title: "Shooting",
-    type: LaborType.ShootMissiles
-  },
-  {
-    title: "Navigation",
-    type: LaborType.Navigation
-  }
-]
-
 export class UnitInput extends Input {
+  public static readonly labors = [
+    {
+      title: "Operate doors",
+      type: LaborType.OperateDoor
+    },
+    {
+      title: "Shooting",
+      type: LaborType.ShootMissiles
+    },
+    {
+      title: "Navigation",
+      type: LaborType.Navigation
+    }
+  ]
+
   constructor(public unit: Creature, private previousInput: Input) {
     super()
   }
 
   get options(): InputOptions {
     return keyBy(
-      labors.map(({ title, type }, i) => {
+      UnitInput.labors.map(({ title, type }, i) => {
         return {
           i,
           title,
@@ -163,7 +165,7 @@ export class UnitInput extends Input {
 
       default:
         const code = key.charCodeAt(0) - 97,
-          labor = labors[code]
+          labor = UnitInput.labors[code]
 
         if (labor) {
           return new ToggleUnitLaborCommand(this.unit, labor.type)
