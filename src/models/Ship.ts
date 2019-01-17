@@ -15,7 +15,8 @@ import {
   Construction,
   DoorSystem,
   MissileSystemConstruction,
-  NavigationSystem
+  NavigationSystem,
+  PhoneStation
 } from "./Construction"
 
 export abstract class TileVisitor<T> {
@@ -281,7 +282,8 @@ export class Ship {
     this.constructions = [
       new NavigationSystem(new Point(10, 1)),
       new DoorSystem(new Point(5, 13)),
-      new MissileSystemConstruction(new Point(6, 18))
+      new MissileSystemConstruction(new Point(6, 18)),
+      new PhoneStation(new Point(7, 8))
     ]
   }
 

@@ -67,3 +67,16 @@ export class NavigationSystem extends Construction {
     return new Point(2, 3)
   }
 }
+
+export class PhoneStation extends Construction {
+  public tiles: { [key: string]: ConstructionTile } = {
+    "0 0": new ConstructionTile(false, "⋌"),
+    "1 0": new ConstructionTile(false, "⋋"),
+    "0 1": new ConstructionTile(false, "௹"),
+    "1 1": new ConstructionTile(true, "∅")
+  }
+
+  get size(): Point {
+    return new Point(2, 2)
+  }
+}
