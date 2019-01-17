@@ -3,5 +3,8 @@ module.exports = {
   plugins: [{
     resolve: '@poi/plugin-typescript',
     options: {}
-  }]
+  }],
+  chainWebpack(config, context) {
+    config.output.publicPath("/soleny/");
+  }
 }
