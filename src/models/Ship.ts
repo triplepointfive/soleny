@@ -9,10 +9,10 @@ import {
   NavigationSystem,
   PhoneStation
 } from "./Construction"
-import { findPath } from "../lib/findPath"
 import { ShipTile, Wall, Door, Space, Floor } from "./Tile"
 import { Unit, UnitID } from "./Unit"
 import { Labor } from "./Labor"
+import { AI } from "../commands/AI"
 
 export interface Drawable {
   tile: ShipTile
@@ -99,17 +99,16 @@ export class Ship {
     return filter(this.labors, l => l.forConstruction(construction))
   }
 
-  public tickUnits(actedUnits: UnitID[]): void {
-    let creature = this.creatures.find(
-      ({ id }: Unit) => !includes(actedUnits, id)
-    )
+  public availableLabors(unit: Unit): Labor[] {
+    return filter(this.labors, l => l.availableTo(unit))
+  }
 
-    if (creature) {
-      const nextPos = findPath(creature.pos, new Point(7, 19), this)
-      actedUnits.push(creature.id)
-      if (nextPos) {
-        creature.pos = nextPos
-      }
+  public tickUnits(actedUnits: UnitID[]): void {
+    let unit = this.creatures.find(({ id }: Unit) => !includes(actedUnits, id))
+
+    if (unit) {
+      new AI(unit).call(this)
+      actedUnits.push(unit.id)
       this.tickUnits(actedUnits)
     } else {
       actedUnits = []
@@ -169,24 +168,24 @@ const plan: ShipTile[] = flatMapDeep(
     "         #··#         ",
     "         #··#         ",
     "         #··#         ",
-    "         #+-#         ",
+    "         #+##         ",
     "         #··#         ",
     "      ####··####      ",
     "      #··+··+··#      ",
     "      #··#··#··#      ",
     "      #··####··#      ",
     "      #··#  #··#      ",
-    "    ###++#++#++###    ",
-    "    #····+··+····#    ",
-    "    #····+··+····#    ",
+    "    ###+##+##+####    ",
+    "    #····#··#····#    ",
+    "    #····#··+····#    ",
     "    #····#··#····#    ",
     "    #····#··#····#    ",
     "    #+##########+#    ",
     "    #····#··#····#    ",
     " ####····#··#····#### ",
-    " #··+····+··+····+··# ",
-    " #··+····+··+····+··# ",
-    " #··###++####++###··# ",
+    " #··#····#··#····+··# ",
+    " #··+····+··#····#··# ",
+    " #··##########+###··# ",
     " #··# #··#  #··# #··# ",
     " #### #··####··# #### ",
     "      #··+··+··#      ",
