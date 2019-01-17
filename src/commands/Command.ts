@@ -7,7 +7,7 @@ import {
   PausedInput
 } from "../inputs/Input"
 import { Direction } from "../lib/Direction"
-import { LaborType } from "../models/Labor"
+import { LaborType, Labor } from "../models/Labor"
 import { Unit } from "../models/Unit"
 
 export abstract class GameCommand {
@@ -90,12 +90,6 @@ export class ToggleUnitLaborCommand extends GameCommand {
         creature.toggleLabor(this.labor)
       }
     })
-    return game
-  }
-}
-
-export class AddLabor extends GameCommand {
-  public call(game: Game): Game {
     return game
   }
 }

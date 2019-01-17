@@ -12,6 +12,7 @@ import {
 import { findPath } from "../lib/findPath"
 import { ShipTile, Wall, Door, Space, Floor } from "./Tile"
 import { Unit, UnitID } from "./Unit"
+import { Labor } from "./Labor"
 
 export interface Drawable {
   tile: ShipTile
@@ -58,7 +59,7 @@ export class Drawer {
 export class Ship {
   public creatures: Unit[] = []
   public constructions: Construction[] = []
-  public actedCreatures: UnitID[] = []
+  public labors: Labor[] = []
 
   constructor(
     public plan: ShipTile[],
@@ -67,10 +68,10 @@ export class Ship {
   ) {
     this.creatures = [new Unit(0, new Point(10, 15))]
     this.constructions = [
-      new NavigationSystem(new Point(10, 1)),
-      new DoorSystem(new Point(5, 13)),
-      new MissileSystemConstruction(new Point(6, 18)),
-      new PhoneStation(new Point(7, 8))
+      new NavigationSystem(0, new Point(10, 1)),
+      new DoorSystem(1, new Point(5, 13)),
+      new MissileSystemConstruction(2, new Point(6, 18)),
+      new PhoneStation(3, new Point(7, 8))
     ]
   }
 
@@ -79,12 +80,12 @@ export class Ship {
   }
 
   public tileAt(pos: Point): ShipTile {
-    const construction = this.constructions.find(construction =>
+    const unit = this.constructions.find(construction =>
       construction.isIntersectional(pos)
     )
 
-    if (construction) {
-      return construction.tileAt(pos)
+    if (unit) {
+      return unit.tileAt(pos)
     }
 
     return this.plan[pos.x + pos.y * this.width]
@@ -94,18 +95,38 @@ export class Ship {
     return false
   }
 
-  public tick(): void {
+  public laborsByConstruction(construction: Construction): Labor[] {
+    return filter(this.labors, l => l.forConstruction(construction))
+  }
+
+  public tickUnits(actedUnits: UnitID[]): void {
     let creature = this.creatures.find(
-      ({ id }: Unit) => !includes(this.actedCreatures, id)
+      ({ id }: Unit) => !includes(actedUnits, id)
     )
 
     if (creature) {
       const nextPos = findPath(creature.pos, new Point(7, 19), this)
+      actedUnits.push(creature.id)
       if (nextPos) {
         creature.pos = nextPos
       }
+      this.tickUnits(actedUnits)
     } else {
-      this.actedCreatures = []
+      actedUnits = []
+    }
+  }
+
+  public tickConstructions(actedConstructions: UnitID[]): void {
+    let construction = this.constructions.find(
+      ({ id }: Construction) => !includes(actedConstructions, id)
+    )
+
+    if (construction) {
+      construction.tick(this)
+      actedConstructions.push(construction.id)
+      this.tickConstructions(actedConstructions)
+    } else {
+      actedConstructions = []
     }
   }
 }
@@ -132,7 +153,9 @@ export class Game {
 
     this.inAction = true
 
-    this.ship.tick()
+    this.ship.tickUnits([])
+    this.ship.tickConstructions([])
+
     this.distanceLeft -= this.speed / 10 // TODO: adjust by tick interval
 
     this.inAction = false

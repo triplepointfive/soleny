@@ -1,10 +1,14 @@
 import { Point } from "../lib/Point"
-import { Game } from "./Ship"
-import { GameCommand, IdGameCommand } from "../commands/Command"
+import { Game, Ship } from "./Ship"
 import { ConstructionTile } from "./Tile"
+import { AnswerPhoneCallLabor } from "./Labor"
+import { sample } from "lodash"
+import { AddLabor } from "../commands/ShipCommand"
+
+export type ConstructionID = number
 
 export abstract class Construction {
-  constructor(public pos: Point) {}
+  constructor(public readonly id: ConstructionID, public pos: Point) {}
   abstract get size(): Point
   public abstract tiles: { [key: string]: ConstructionTile }
 
@@ -24,7 +28,7 @@ export abstract class Construction {
     )
   }
 
-  public abstract tick(game: Game): GameCommand
+  public abstract tick(ship: Ship): void
 }
 
 export class DoorSystem extends Construction {
@@ -39,9 +43,7 @@ export class DoorSystem extends Construction {
     return new Point(2, 2)
   }
 
-  public tick(game: Game): GameCommand {
-    return new IdGameCommand()
-  }
+  public tick(ship: Ship): void {}
 }
 
 export class MissileSystemConstruction extends Construction {
@@ -61,9 +63,7 @@ export class MissileSystemConstruction extends Construction {
     return new Point(3, 3)
   }
 
-  public tick(game: Game): GameCommand {
-    return new IdGameCommand()
-  }
+  public tick(ship: Ship): void {}
 }
 
 export class NavigationSystem extends Construction {
@@ -80,9 +80,7 @@ export class NavigationSystem extends Construction {
     return new Point(2, 3)
   }
 
-  public tick(game: Game): GameCommand {
-    return new IdGameCommand()
-  }
+  public tick(ship: Ship): void {}
 }
 
 export class PhoneStation extends Construction {
@@ -97,7 +95,21 @@ export class PhoneStation extends Construction {
     return new Point(2, 2)
   }
 
-  public tick(game: Game): GameCommand {
-    return new IdGameCommand()
+  public tick(ship: Ship): void {
+    if (ship.laborsByConstruction(this).length > 0) {
+      return
+    }
+
+    if (this.addNewLabor()) {
+      let creature = sample(ship.creatures)
+
+      if (creature) {
+        new AddLabor(new AnswerPhoneCallLabor(creature, this)).call(ship)
+      }
+    }
+  }
+
+  private addNewLabor(): boolean {
+    return Math.random() < 0.1
   }
 }
