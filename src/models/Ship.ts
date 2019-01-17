@@ -1,16 +1,7 @@
-import {
-  includes,
-  flatMapDeep,
-  isEqual,
-  uniqWith,
-  flatMap,
-  filter,
-  remove
-} from "lodash"
+import { includes, flatMapDeep, filter } from "lodash"
 import { Input, IdleInput } from "../inputs/Input"
 import { Point } from "../lib/Point"
 import { Direction } from "../lib/Direction"
-import { LaborType } from "../commands/Labor"
 import {
   Construction,
   DoorSystem,
@@ -18,154 +9,13 @@ import {
   NavigationSystem,
   PhoneStation
 } from "./Construction"
-
-export abstract class TileVisitor<T> {
-  public abstract visitConstruction(construction: ConstructionTile): T
-  public abstract visitDoor(door: Door): T
-  public abstract visitWall(door: Wall): T
-  public abstract visitFloor(door: Floor): T
-  public abstract visitSpace(space: Space): T
-}
-
-export abstract class ShipTile {
-  public abstract visit<T>(visitor: TileVisitor<T>): T
-}
-
-export class ConstructionTile extends ShipTile {
-  constructor(public passable: boolean, public symbol: string) {
-    super()
-  }
-
-  public visit<T>(visitor: TileVisitor<T>): T {
-    return visitor.visitConstruction(this)
-  }
-}
-
-export class Space extends ShipTile {
-  public visit<T>(visitor: TileVisitor<T>): T {
-    return visitor.visitSpace(this)
-  }
-}
-
-export class Door extends ShipTile {
-  constructor(public open: boolean) {
-    super()
-  }
-
-  public visit<T>(visitor: TileVisitor<T>): T {
-    return visitor.visitDoor(this)
-  }
-}
-
-export class Wall extends ShipTile {
-  public visit<T>(visitor: TileVisitor<T>): T {
-    return visitor.visitWall(this)
-  }
-}
-
-export class Floor extends ShipTile {
-  public visit<T>(visitor: TileVisitor<T>): T {
-    return visitor.visitFloor(this)
-  }
-}
-
-export class SymbolTileVisitor extends TileVisitor<string> {
-  public visitSpace(space: Space): string {
-    return " "
-  }
-
-  public visitConstruction({ symbol }: ConstructionTile): string {
-    return symbol
-  }
-
-  public visitDoor(door: Door): string {
-    if (door.open) {
-      return "-"
-    } else {
-      return "+"
-    }
-  }
-
-  public visitWall(wall: Wall): string {
-    return "#"
-  }
-
-  public visitFloor(floor: Floor): string {
-    return "·"
-  }
-}
-
-export class StyleTileVisitor extends TileVisitor<string> {
-  public visitSpace(space: Space): string {
-    return "-space"
-  }
-
-  public visitConstruction(construction: ConstructionTile): string {
-    return "-construction"
-  }
-
-  public visitDoor(door: Door): string {
-    if (door.open) {
-      return "-open-door"
-    } else {
-      return "-close-door"
-    }
-  }
-
-  public visitWall(wall: Wall): string {
-    return "-wall"
-  }
-
-  public visitFloor(floor: Floor): string {
-    return "-floor"
-  }
-}
-
-export class PassableTileVisitor extends TileVisitor<boolean> {
-  public visitSpace(space: Space): boolean {
-    return false
-  }
-
-  public visitConstruction({ passable }: ConstructionTile): boolean {
-    return passable
-  }
-
-  public visitDoor(door: Door): boolean {
-    return true
-  }
-
-  public visitWall(door: Wall): boolean {
-    return false
-  }
-
-  public visitFloor(floor: Floor): boolean {
-    return true
-  }
-}
-
-export type CreatureId = number
-
-export class Creature {
-  private doesLabors: LaborType[] = []
-
-  constructor(public id: CreatureId, public pos: Point) {}
-
-  public does(labor: LaborType): boolean {
-    return this.doesLabors.find(l => l === labor) !== undefined
-  }
-
-  public toggleLabor(labor: LaborType): void {
-    if (this.does(labor)) {
-      this.doesLabors = filter(this.doesLabors, l => l !== labor)
-    } else {
-      this.doesLabors.push(labor)
-    }
-  }
-}
+import { findPath } from "../lib/findPath"
+import { ShipTile, Wall, Door, Space, Floor } from "./Tile"
+import { Unit, UnitID } from "./Unit"
 
 export interface Drawable {
   tile: ShipTile
-  creatures: Creature[]
+  creatures: Unit[]
   selected: boolean
 }
 
@@ -200,85 +50,22 @@ export class Drawer {
     return {
       tile: this.ship.tileAt(pos),
       creatures: this.ship.creaturesAt(pos),
-      selected: this.ship.isSelected(pos)
+      selected: this.ship.isSelected()
     }
   }
-}
-
-const findPath = function(
-  pos: Point,
-  dest: Point,
-  ship: Ship
-): Point | undefined {
-  if (pos.eq(dest)) {
-    return
-  }
-
-  let mask: Array<undefined | number> = []
-
-  let turn = 0,
-    toCheck = [pos],
-    newPosToCheck: Point[] = [],
-    passableVisitor = new PassableTileVisitor()
-
-  while (toCheck.length && mask[dest.x + dest.y * ship.width] === undefined) {
-    toCheck.forEach(checkPos => {
-      const tile = ship.tileAt(checkPos)
-
-      if (tile.visit(passableVisitor)) {
-        mask[checkPos.x + checkPos.y * ship.width] = turn
-        newPosToCheck.push(checkPos)
-      } else {
-        mask[checkPos.x + checkPos.y * ship.width] = -1
-      }
-    })
-
-    turn += 1
-
-    toCheck = uniqWith(
-      flatMap(newPosToCheck, nextPos => nextPos.wrappers()),
-      isEqual
-    ).filter(({ x, y }: Point) => mask[x + y * ship.width] === undefined)
-    newPosToCheck = []
-  }
-
-  if (mask[dest.x + dest.y * ship.width]) {
-    let lastPos: Point | undefined = dest,
-      prevPos: Point | undefined = lastPos
-
-    turn -= 2
-    while (turn > 0 && prevPos) {
-      lastPos = prevPos
-        .orthoWraps()
-        .find(({ x, y }: Point) => mask[x + y * ship.width] === turn)
-
-      lastPos =
-        lastPos ||
-        prevPos
-          .diagWraps()
-          .find(({ x, y }: Point) => mask[x + y * ship.width] === turn)
-
-      turn -= 1
-      prevPos = lastPos
-    }
-
-    return lastPos
-  }
-
-  return
 }
 
 export class Ship {
-  public creatures: Creature[] = []
+  public creatures: Unit[] = []
   public constructions: Construction[] = []
-  public actedCreatures: CreatureId[] = []
+  public actedCreatures: UnitID[] = []
 
   constructor(
     public plan: ShipTile[],
     public width: number,
     public height: number
   ) {
-    this.creatures = [new Creature(0, new Point(10, 15))]
+    this.creatures = [new Unit(0, new Point(10, 15))]
     this.constructions = [
       new NavigationSystem(new Point(10, 1)),
       new DoorSystem(new Point(5, 13)),
@@ -287,7 +74,7 @@ export class Ship {
     ]
   }
 
-  public creaturesAt(pos: Point): Creature[] {
+  public creaturesAt(pos: Point): Unit[] {
     return filter(this.creatures, creature => creature.pos.eq(pos))
   }
 
@@ -303,13 +90,13 @@ export class Ship {
     return this.plan[pos.x + pos.y * this.width]
   }
 
-  public isSelected(pos: Point): boolean {
+  public isSelected(): boolean {
     return false
   }
 
   public tick(): void {
     let creature = this.creatures.find(
-      ({ id }: Creature) => !includes(this.actedCreatures, id)
+      ({ id }: Unit) => !includes(this.actedCreatures, id)
     )
 
     if (creature) {

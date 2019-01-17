@@ -1,4 +1,4 @@
-import { Game, Creature } from "../models/Ship"
+import { Game } from "../models/Ship"
 import {
   Input,
   FacilitiesInput,
@@ -7,13 +7,14 @@ import {
   PausedInput
 } from "../inputs/Input"
 import { Direction } from "../lib/Direction"
-import { LaborType } from "./Labor"
+import { LaborType } from "../models/Labor"
+import { Unit } from "../models/Unit"
 
 export abstract class GameCommand {
   public abstract call(game: Game): Game
 }
 
-export class IdInputCommand extends GameCommand {
+export class IdGameCommand extends GameCommand {
   public call(game: Game): Game {
     return game
   }
@@ -43,7 +44,6 @@ export class OpenUnitsInputCommand extends GameCommand {
   public call(game: Game): Game {
     game.input = new UnitsInput(game.ship.creatures, game.pause)
     game.pause = true
-    // game.drawer.showCursor = true
     return game
   }
 }
@@ -80,7 +80,7 @@ export class TogglePauseCommand extends GameCommand {
 }
 
 export class ToggleUnitLaborCommand extends GameCommand {
-  constructor(private unit: Creature, private labor: LaborType) {
+  constructor(private unit: Unit, private labor: LaborType) {
     super()
   }
 
@@ -90,6 +90,12 @@ export class ToggleUnitLaborCommand extends GameCommand {
         creature.toggleLabor(this.labor)
       }
     })
+    return game
+  }
+}
+
+export class AddLabor extends GameCommand {
+  public call(game: Game): Game {
     return game
   }
 }

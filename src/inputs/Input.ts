@@ -1,8 +1,7 @@
-import { Creature } from "../models/Ship"
 import {
   GameCommand,
   GoToInputCommand,
-  IdInputCommand,
+  IdGameCommand,
   OpenFacilitiesInputCommand,
   TogglePauseCommand,
   MoveCursorInputCommand,
@@ -11,8 +10,9 @@ import {
   ClosePausedInputCommand
 } from "../commands/Command"
 import { Direction } from "../lib/Direction"
-import { keyBy, map, mapValues, find } from "lodash"
-import { LaborType } from "../commands/Labor"
+import { keyBy, mapValues, find } from "lodash"
+import { LaborType } from "../models/Labor"
+import { Unit } from "../models/Unit"
 
 export interface InputOption {
   title: string
@@ -36,7 +36,7 @@ export abstract class PausedInput extends Input {
   }
 }
 
-const idleCommand = new IdInputCommand()
+const idleCommand = new IdGameCommand()
 
 export class IdleInput extends Input {
   get options(): InputOptions {
@@ -88,9 +88,9 @@ export class FacilitiesInput extends PausedInput {
 }
 
 export class UnitsInput extends PausedInput {
-  public readonly units: { [key: string]: Creature }
+  public readonly units: { [key: string]: Unit }
 
-  constructor(units: Creature[], oldPauseState: boolean) {
+  constructor(units: Unit[], oldPauseState: boolean) {
     super(oldPauseState)
 
     this.units = {}
@@ -101,7 +101,7 @@ export class UnitsInput extends PausedInput {
   }
 
   get options(): InputOptions {
-    return mapValues(this.units, unit => {
+    return mapValues(this.units, () => {
       return { title: "Human" }
     })
   }
@@ -139,7 +139,7 @@ export class UnitInput extends Input {
     }
   ]
 
-  constructor(public unit: Creature, private previousInput: Input) {
+  constructor(public unit: Unit, private previousInput: Input) {
     super()
   }
 

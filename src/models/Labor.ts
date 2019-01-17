@@ -3,3 +3,5 @@ export enum LaborType {
   ShootMissiles,
   Navigation
 }
+
+export abstract class Labor {}

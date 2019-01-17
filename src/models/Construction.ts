@@ -1,5 +1,8 @@
 import { Point } from "../lib/Point"
-import { ConstructionTile } from "./Ship"
+import { Game } from "./Ship"
+import { GameCommand, IdGameCommand } from "../commands/Command"
+import { ConstructionTile } from "./Tile"
+
 export abstract class Construction {
   constructor(public pos: Point) {}
   abstract get size(): Point
@@ -20,6 +23,8 @@ export abstract class Construction {
       new ConstructionTile(false, "E")
     )
   }
+
+  public abstract tick(game: Game): GameCommand
 }
 
 export class DoorSystem extends Construction {
@@ -32,6 +37,10 @@ export class DoorSystem extends Construction {
 
   get size(): Point {
     return new Point(2, 2)
+  }
+
+  public tick(game: Game): GameCommand {
+    return new IdGameCommand()
   }
 }
 
@@ -51,6 +60,10 @@ export class MissileSystemConstruction extends Construction {
   get size(): Point {
     return new Point(3, 3)
   }
+
+  public tick(game: Game): GameCommand {
+    return new IdGameCommand()
+  }
 }
 
 export class NavigationSystem extends Construction {
@@ -66,6 +79,10 @@ export class NavigationSystem extends Construction {
   get size(): Point {
     return new Point(2, 3)
   }
+
+  public tick(game: Game): GameCommand {
+    return new IdGameCommand()
+  }
 }
 
 export class PhoneStation extends Construction {
@@ -78,5 +95,9 @@ export class PhoneStation extends Construction {
 
   get size(): Point {
     return new Point(2, 2)
+  }
+
+  public tick(game: Game): GameCommand {
+    return new IdGameCommand()
   }
 }

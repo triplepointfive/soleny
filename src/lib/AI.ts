@@ -1,7 +1,7 @@
-import { GameCommand, IdInputCommand } from "../commands/Command"
+import { GameCommand, IdGameCommand } from "../commands/Command"
 
 export class AI {
   public run(): GameCommand {
-    return new IdInputCommand()
+    return new IdGameCommand()
   }
 }

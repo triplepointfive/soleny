@@ -14,14 +14,9 @@ import {
   Tile
 } from "unicodetiles.ts";
 
-import {
-  SymbolTileVisitor,
-  StyleTileVisitor,
-  Drawable,
-  Drawer,
-  Game,
-  Ship
-} from "../models/Ship";
+import { Drawable, Drawer, Game, Ship } from "../models/Ship";
+
+import { SymbolTileVisitor, StyleTileVisitor } from "../models/Tile";
 
 import { Point } from "../lib/Point";
 
