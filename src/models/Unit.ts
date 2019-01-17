@@ -7,8 +7,13 @@ export type UnitID = number
 export class Unit {
   private doesLabors: LaborType[] = []
   public pickedLabor: Labor | undefined
+  public readonly name: string
 
-  constructor(public id: UnitID, public pos: Point) {}
+  constructor(public id: UnitID, public pos: Point) {
+    this.name = Math.random()
+      .toString(36)
+      .substr(2, 9)
+  }
 
   public pickLabor(labor: Labor): void {
     this.pickedLabor = labor

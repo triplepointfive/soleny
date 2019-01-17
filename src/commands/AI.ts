@@ -1,5 +1,5 @@
 import { Unit } from "../models/Unit"
-import { ShipCommand } from "./ShipCommand"
+import { ShipCommand, RemoveLaborCommand } from "./ShipCommand"
 import { Ship } from "../models/Ship"
 
 export class AI extends ShipCommand {
@@ -10,8 +10,7 @@ export class AI extends ShipCommand {
   public call(ship: Ship): void {
     if (this.unit.pickedLabor) {
       if (this.unit.pickedLabor.canBeRemoved) {
-        // TODO: Ship remove labor
-        this.unit.denyLabor()
+        new RemoveLaborCommand(this.unit.pickedLabor).call(ship)
       } else {
         return this.unit.pickedLabor.perform(ship)
       }

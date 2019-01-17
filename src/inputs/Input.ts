@@ -17,6 +17,7 @@ import { Unit } from "../models/Unit"
 export interface InputOption {
   title: string
   style?: string
+  description?: string
 }
 
 export type InputOptions = { [key: string]: InputOption }
@@ -101,8 +102,11 @@ export class UnitsInput extends PausedInput {
   }
 
   get options(): InputOptions {
-    return mapValues(this.units, () => {
-      return { title: "Human" }
+    return mapValues(this.units, unit => {
+      return {
+        title: `Human ${unit.name}`,
+        description: unit.pickedLabor ? unit.pickedLabor.takenName : "Slacking"
+      }
     })
   }
 
@@ -113,7 +117,7 @@ export class UnitsInput extends PausedInput {
         return new ClosePausedInputCommand(this)
 
       default:
-        const creature = find(this.units, (unit, symbol) => symbol === key)
+        const creature = find(this.units, (_unit, symbol) => symbol === key)
         if (creature) {
           return new GoToInputCommand(new UnitInput(creature, this))
         }

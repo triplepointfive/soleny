@@ -5,6 +5,8 @@
       | {{ k }}
     .value(:class="v.style")
       | {{ v.title }}
+    .description(v-if="v.description")
+      | {{ v.description }}
 </template>
 
 <script lang="ts">
@@ -20,14 +22,16 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
+$key_width: 3rem;
+
 .input-menu {
   margin: 1rem;
 
   > .menu-option {
     > .key {
-      display: inline;
-      margin-right: 0.5rem;
+      display: inline-block;
       color: orange;
+      width: $key_width;
 
       &::before {
         content: "[";
@@ -48,6 +52,11 @@ export default Vue.extend({
       &.-inactive {
         color: grey;
       }
+    }
+
+    > .description {
+      margin-left: $key_width;
+      color: lightgrey;
     }
   }
 }

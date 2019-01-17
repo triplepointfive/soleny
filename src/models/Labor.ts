@@ -19,6 +19,8 @@ export abstract class Labor {
   public abstract availableTo(unit: Unit): boolean
   public abstract perform(ship: Ship): void
 
+  abstract get takenName(): string
+
   public assign(unit: Unit): void {
     this.pickedBy = unit
   }
@@ -48,6 +50,10 @@ export class AnswerPhoneCallLabor extends ConstructionLabor {
   public tick(): void {
     this.ringsLeft--
     this.canBeRemoved = this.ringsLeft <= 0
+  }
+
+  get takenName(): string {
+    return "Answering call from Earth"
   }
 
   public availableTo(unit: Unit): boolean {

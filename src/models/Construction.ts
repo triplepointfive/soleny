@@ -1,9 +1,9 @@
 import { Point } from "../lib/Point"
-import { Game, Ship } from "./Ship"
+import { Ship } from "./Ship"
 import { ConstructionTile } from "./Tile"
 import { AnswerPhoneCallLabor } from "./Labor"
 import { sample } from "lodash"
-import { AddLabor } from "../commands/ShipCommand"
+import { AddLaborCommand } from "../commands/ShipCommand"
 
 export type ConstructionID = number
 
@@ -104,12 +104,13 @@ export class PhoneStation extends Construction {
       let creature = sample(ship.creatures)
 
       if (creature) {
-        new AddLabor(new AnswerPhoneCallLabor(creature, this)).call(ship)
+        new AddLaborCommand(new AnswerPhoneCallLabor(creature, this)).call(ship)
       }
     }
   }
 
   private addNewLabor(): boolean {
-    return Math.random() < 0.1
+    // TODO: Move to config
+    return Math.random() < 0.01
   }
 }
